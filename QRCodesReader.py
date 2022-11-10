@@ -1,8 +1,6 @@
 import qrcode as qr
 import cv2
 
-from random import randint
-
 
 def create_code(num, name):
     """
@@ -18,24 +16,23 @@ def create_code(num, name):
     img.save(name + '.png')
 
 
-def scan_code(name):
+def scan_code(img, detector):
     """
     Сканирование QR-кода и вывод картинки с обведенным в квадрат кодом
-    :param name: имя файла с кодом
+    :param img: кадр с камеры
     :return: data: содержимое кода
     """
-    img = cv2.imread(name)
-    detector = cv2.QRCodeDetector()
 
     # закодированные данные, координаты вершин кода, исправленное изображение кода
     data, bbox, straight_qrcode = detector.detectAndDecode(img)
 
     # наверное нам не нужно это но пусть будет
-    if bbox is not None:
+    if bbox is not None and data is not None and data != '':
         print(f"QRCode data:\n{data}")
         # отображаем изображение с линиями
         # длина ограничивающей рамки
         n_lines = len(bbox[0])
+        cv2.putText(img, data, tuple(bbox[0][0].astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         for i in range(n_lines):
             # рисуем все линии
             point1 = tuple(bbox[0][i].astype(int))
@@ -45,8 +42,8 @@ def scan_code(name):
                      point2,
                      color=(255, 0, 0),
                      thickness=2)
-    else:
-        print('Nothing there')
+
+    return img
 
     cv2.imshow("img", img)
     cv2.waitKey(0)
@@ -54,4 +51,18 @@ def scan_code(name):
 
     return data
 
+
+detector = cv2.QRCodeDetector()
+cap = cv2.VideoCapture(0)
+while True:
+    _, img = cap.read()
+
+    img = scan_code(img, detector)
+
+    cv2.imshow('img', img)
+    if cv2.waitKey(1) == ord("q"):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
 
