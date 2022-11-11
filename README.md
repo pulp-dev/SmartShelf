@@ -1,2 +1,5 @@
 # SmartShelf
-QRCodesReader - две функции (создание/чтение QR-кодов)
+Camera.py
+- Скан лиц
+- Блюр лиц
+- Скан QR-кодов
